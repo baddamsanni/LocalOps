@@ -1,0 +1,124 @@
+# ─────────────────────────────────────────────────────────────
+# localops — single config file for all integrations
+# Copy this to config.yml and fill in your values.
+# config.yml is gitignored. Never commit real credentials.
+# ─────────────────────────────────────────────────────────────
+
+# ── TELEGRAM ─────────────────────────────────────────────────
+telegram:
+  bot_token: "YOUR_BOT_TOKEN"       # from @BotFather
+  allowed_user_id: 123456789        # from @userinfobot
+  poll_interval_seconds: 1
+
+# ── LLM ──────────────────────────────────────────────────────
+# provider: "claude" | "ollama" | "openai"
+# Only the section matching your provider needs to be filled.
+llm:
+  provider: "ollama"                # switch here to change provider
+
+  claude:
+    api_key: "sk-ant-..."
+    model: "claude-sonnet-4-6"
+
+  ollama:
+    base_url: "http://localhost:11434"
+    model: "qwen2.5:7b"             # run `ollama list` to see names
+
+  openai:
+    api_key: "sk-..."
+    model: "gpt-4o"
+    base_url: "https://api.openai.com/v1"  # override for local OpenAI-compatible servers
+
+# ── EXECUTOR ─────────────────────────────────────────────────
+executor:
+  working_directory: "."
+  timeout_seconds: 300
+  max_output_chars: 4000
+
+# ── STREAMING ────────────────────────────────────────────────
+# Telegram rate-limits edits (~1/sec). Throttle message updates.
+streaming:
+  edit_throttle_seconds: 1.0
+
+# ── SAFETY ───────────────────────────────────────────────────
+safety:
+  blocked_patterns:
+    - "rm\\s+-rf\\s+/"
+    - "dd\\s+if="
+    - "mkfs"
+    - "> /dev/"
+    - "chmod\\s+777\\s+/"
+    - "curl.*\\|.*sh"               # curl pipe to shell
+    # File/directory deletion — never executed, no confirmation override
+    - "\\brm\\b"
+    - "\\brmdir\\b"
+    - "\\bunlink\\b"
+    - "\\bshred\\b"
+    - "\\btruncate\\b"
+    - "find.*-delete"
+    - "find.*-exec\\s+rm"
+    - "git\\s+clean\\s+-[a-z]*f"
+    # Move/rename that destroys the original
+    - "mv\\s+.*\\s+/dev/null"
+    - "mv\\s+(\\S+)\\s+\\1\\b"
+
+  destructive_keywords:
+    - "drop"
+    - "delete"
+    - "kill"
+    - "pkill"
+    - "format"
+    - "wipe"
+
+  read_only_commands:
+    - "cd"
+    - "ls"
+    - "ps"
+    - "df"
+    - "du"
+    - "cat"
+    - "tail"
+    - "head"
+    - "grep"
+    - "find"
+    - "curl"
+    - "ping"
+    - "top"
+    - "htop"
+    - "docker ps"
+    - "docker logs"
+    - "git status"
+    - "git log"
+    - "git diff"
+    - "gh pr list"
+    - "gh issue list"
+    - "gh repo view"
+    - "ollama list"
+    - "python --version"
+    - "node --version"
+    - "java -version"
+    # Hardware / system info (read-only — never path-confined)
+    - "sysctl"
+    - "sysctl -n hw.memsize"
+    - "sysctl -n hw.ncpu"
+    - "sysctl -n hw.physicalcpu"
+    - "system_profiler"
+    - "uname"
+    - "lscpu"
+    - "free"
+    - "vm_stat"
+    - "diskutil list"
+    - "diskutil info"
+    - "system_profiler SPHardwareDataType"
+    - "sw_vers"
+    - "hostinfo"
+    - "nproc"
+
+# ── NOTIFICATIONS (future) ────────────────────────────────────
+# Proactive alerts — bot messages you when these conditions hit.
+# Set enabled: false to disable without removing the block.
+notifications:
+  enabled: false
+  cpu_threshold_percent: 85
+  memory_threshold_percent: 90
+  poll_every_seconds: 60

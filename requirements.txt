@@ -1,0 +1,6 @@
+python-telegram-bot==20.*
+anthropic
+httpx
+pyyaml
+pytest
+pytest-asyncio
